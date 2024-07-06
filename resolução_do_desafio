@@ -1,0 +1,56 @@
+from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel
+from datetime import datetime
+from sqlalchemy.exc import IntegrityError
+from typing import List
+
+app = FastAPI()
+
+class Item(BaseModel):
+    name: str
+    cpf: str
+
+class UpdateItem(BaseModel):
+    name: str
+    updated_at: datetime = None
+
+class Product(BaseModel):
+    name: str
+    price: float
+
+@app.post("/create/")
+def create_item(item: Item):
+    try:
+        # Lógica de inserção de dados aqui
+        pass
+    except IntegrityError as e:
+        raise HTTPException(status_code=400, detail="Erro de inserção: já existe um item com esses dados.")
+
+@app.patch("/update/{item_id}")
+def update_item(item_id: int, item: UpdateItem):
+    # Simulação de busca de item no banco de dados
+    db_item = None  # Suponha que essa linha busca o item pelo ID e retorna None se não encontrar
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item não encontrado.")
+
+    # Atualização do item
+    db_item.name = item.name
+    db_item.updated_at = item.updated_at if item.updated_at else datetime.utcnow()
+    # Lógica para salvar as mudanças no banco de dados aqui
+    return db_item
+
+@app.post("/products/")
+def create_product(product: Product):
+    # Lógica para salvar o produto no banco de dados aqui
+    return product
+
+@app.get("/products/")
+def get_products(price_min: float = 5000, price_max: float = 8000):
+    # Simulação de busca de produtos no banco de dados
+    products = [
+        {"name": "Produto 1", "price": 6000},
+        {"name": "Produto 2", "price": 7000},
+        {"name": "Produto 3", "price": 9000},
+    ]
+    filtered_products = [product for product in products if price_min < product["price"] < price_max]
+    return filtered_products
